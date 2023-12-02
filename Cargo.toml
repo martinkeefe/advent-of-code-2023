@@ -1,9 +1,8 @@
 [workspace]
-
 resolver = "2"
-
 members = ["day-*"]
 
-
-# [workspace.dependencies]
-# regex = "1.10.2"
+[workspace.dependencies]
+aoc-parse = "0.2.17"
+regex = "1.10.2"
+nom = "7.1.3"

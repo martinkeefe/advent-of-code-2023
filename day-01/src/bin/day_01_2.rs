@@ -1,19 +1,19 @@
 use regex::Regex;
 
 fn main() {
-    let input = include_str!("./input.txt");
-    let output = process(input);
-    dbg!(output);
+    println!("{}", process(include_str!("./input.txt")));
 }
 
-fn process(input: &str) -> i32 {
-    input.lines().fold(0, |acc, line| {
-        acc + [first_digit(line), last_digit(line)]
-            .join("")
-            .parse::<i32>()
-            .expect("cannot parse")
-    })
-}
+// -----------------------------------------------------------------------------
+// Solution
+//
+// two1nine
+// eightwothree
+// abcone2threexyz
+// xtwone3four
+// 4nineeightseven2
+// zoneight234
+// 7pqrstsixteen
 
 fn digit(s: &str) -> String {
     if s.len() == 1 {
@@ -48,21 +48,24 @@ fn last_digit(line: &str) -> String {
     digit(&m.chars().rev().collect::<String>())
 }
 
+fn process(input: &str) -> u32 {
+    input.lines().fold(0, |acc, line| {
+        acc + [first_digit(line), last_digit(line)]
+            .join("")
+            .parse::<u32>()
+            .expect("cannot parse")
+    })
+}
+
+// -----------------------------------------------------------------------------
+// Testing
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn check_sample() {
-        let result = process(
-            "two1nine
-eightwothree
-abcone2threexyz
-xtwone3four
-4nineeightseven2
-zoneight234
-7pqrstsixteen",
-        );
-        assert_eq!(result, 281)
+        assert_eq!(process(include_str!("./sample_2.txt")), 281)
     }
 }
