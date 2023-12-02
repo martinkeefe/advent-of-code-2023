@@ -11,26 +11,23 @@ fn main() {
 // treb7uchet
 
 fn first_digit(line: &str) -> String {
-    line.chars()
-        .find(|c| c.is_ascii_digit())
-        .expect("no digits in line")
-        .into()
+    line.chars().find(|c| c.is_ascii_digit()).unwrap().into()
 }
 
 fn last_digit(line: &str) -> String {
     line.chars()
         .rev()
         .find(|c| c.is_ascii_digit())
-        .expect("no digits in line")
+        .unwrap()
         .into()
 }
 
 fn process(input: &str) -> u32 {
-    input.lines().fold(0, |acc, line| {
-        acc + [first_digit(line), last_digit(line)]
+    input.lines().fold(0, |sum, line| {
+        sum + [first_digit(line), last_digit(line)]
             .join("")
             .parse::<u32>()
-            .expect("cannot parse")
+            .unwrap()
     })
 }
 

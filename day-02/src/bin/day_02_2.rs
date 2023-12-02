@@ -31,36 +31,34 @@ struct Game {
 
 // e.g. 5 blue, 13 green
 fn parse_hand(s: &str) -> Hand {
-    let mut hand = Hand {
-        red: 0,
-        green: 0,
-        blue: 0,
-    };
-
-    for c in s.split(", ") {
-        let nc = c.split(' ').collect::<Vec<_>>();
-        let n = nc[0].parse::<u32>().unwrap();
-        match nc[1] {
-            "red" => hand.red = n,
-            "green" => hand.green = n,
-            "blue" => hand.blue = n,
-            _ => unreachable!(),
-        }
-    }
-
-    hand
+    s.split(", ").fold(
+        Hand {
+            red: 0,
+            green: 0,
+            blue: 0,
+        },
+        |hand, c| {
+            let (n, clr) = c.split_once(' ').unwrap();
+            let n = n.parse::<u32>().unwrap();
+            match clr {
+                "red" => Hand { red: n, ..hand },
+                "green" => Hand { green: n, ..hand },
+                "blue" => Hand { blue: n, ..hand },
+                _ => unreachable!(),
+            }
+        },
+    )
 }
 
 fn parse_game(line: &str) -> Game {
+    let (_id, hs) = line
+        .strip_prefix("Game ")
+        .unwrap()
+        .split_once(": ")
+        .unwrap();
+
     Game {
-        hands: line
-            .strip_prefix("Game ")
-            .unwrap()
-            .split(": ")
-            .collect::<Vec<_>>()[1]
-            .split("; ")
-            .map(parse_hand)
-            .collect::<Vec<_>>(),
+        hands: hs.split("; ").map(parse_hand).collect(),
     }
 }
 
@@ -68,19 +66,18 @@ fn parse_game(line: &str) -> Game {
 // Solution
 
 fn minimum_bag(game: Game) -> Bag {
-    let mut bag = Bag {
-        red: 0,
-        green: 0,
-        blue: 0,
-    };
-
-    for hand in game.hands {
-        bag.red = bag.red.max(hand.red);
-        bag.green = bag.green.max(hand.green);
-        bag.blue = bag.blue.max(hand.blue);
-    }
-
-    bag
+    game.hands.iter().fold(
+        Bag {
+            red: 0,
+            green: 0,
+            blue: 0,
+        },
+        |bag, hand| Bag {
+            red: bag.red.max(hand.red),
+            green: bag.green.max(hand.green),
+            blue: bag.blue.max(hand.blue),
+        },
+    )
 }
 
 fn power(cubes: CubeCounts) -> u32 {
@@ -88,13 +85,10 @@ fn power(cubes: CubeCounts) -> u32 {
 }
 
 fn process(input: &str) -> u32 {
-    let mut sum = 0;
-
-    for game in input.lines().map(parse_game) {
-        sum += power(minimum_bag(game));
-    }
-
-    sum
+    input
+        .lines()
+        .map(parse_game)
+        .fold(0, |sum, game| sum + power(minimum_bag(game)))
 }
 
 // -----------------------------------------------------------------------------
@@ -105,7 +99,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_works() {
+    fn check_sample() {
         assert_eq!(process(include_str!("./sample.txt")), 2286)
     }
 }

@@ -35,25 +35,36 @@ fn digit(s: &str) -> String {
     .into()
 }
 
+fn reverse(s: &str) -> String {
+    s.chars().rev().collect::<String>()
+}
+
 fn first_digit(line: &str) -> String {
-    let rx = Regex::new("[1-9]|one|two|three|four|five|six|seven|eight|nine").unwrap();
-    let m = rx.find(line).expect("no digits in line").as_str();
-    digit(m)
+    digit(
+        Regex::new("[1-9]|one|two|three|four|five|six|seven|eight|nine")
+            .unwrap()
+            .find(line)
+            .unwrap()
+            .as_str(),
+    )
 }
 
 fn last_digit(line: &str) -> String {
-    let rx = Regex::new("[1-9]|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin").unwrap();
-    let rev_line = line.chars().rev().collect::<String>();
-    let m = rx.find(&rev_line).expect("no digits in line").as_str();
-    digit(&m.chars().rev().collect::<String>())
+    digit(&reverse(
+        Regex::new("[1-9]|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin")
+            .unwrap()
+            .find(&reverse(line))
+            .unwrap()
+            .as_str(),
+    ))
 }
 
 fn process(input: &str) -> u32 {
-    input.lines().fold(0, |acc, line| {
-        acc + [first_digit(line), last_digit(line)]
+    input.lines().fold(0, |sum, line| {
+        sum + [first_digit(line), last_digit(line)]
             .join("")
             .parse::<u32>()
-            .expect("cannot parse")
+            .unwrap()
     })
 }
 

@@ -32,36 +32,35 @@ struct Game {
 
 // e.g. 5 blue, 13 green
 fn parse_hand(s: &str) -> Hand {
-    let mut hand = Hand {
-        red: 0,
-        green: 0,
-        blue: 0,
-    };
-
-    for c in s.split(", ") {
-        let nc = c.split(' ').collect::<Vec<_>>();
-        let n = nc[0].parse::<u32>().unwrap();
-        match nc[1] {
-            "red" => hand.red = n,
-            "green" => hand.green = n,
-            "blue" => hand.blue = n,
-            _ => unreachable!(),
-        }
-    }
-
-    hand
+    s.split(", ").fold(
+        Hand {
+            red: 0,
+            green: 0,
+            blue: 0,
+        },
+        |hand, c| {
+            let (n, clr) = c.split_once(' ').unwrap();
+            let n = n.parse::<u32>().unwrap();
+            match clr {
+                "red" => Hand { red: n, ..hand },
+                "green" => Hand { green: n, ..hand },
+                "blue" => Hand { blue: n, ..hand },
+                _ => unreachable!(),
+            }
+        },
+    )
 }
 
 fn parse_game(line: &str) -> Game {
-    let id_hs = line
+    let (id, hs) = line
         .strip_prefix("Game ")
         .unwrap()
-        .split(": ")
-        .collect::<Vec<_>>();
+        .split_once(": ")
+        .unwrap();
 
     Game {
-        id: id_hs[0].parse::<u32>().unwrap(),
-        hands: id_hs[1].split("; ").map(parse_hand).collect::<Vec<_>>(),
+        id: id.parse::<u32>().unwrap(),
+        hands: hs.split("; ").map(parse_hand).collect(),
     }
 }
 
@@ -74,20 +73,17 @@ fn possible_with(bag: Bag) -> impl Fn(&Hand) -> bool {
 }
 
 fn process(input: &str) -> u32 {
-    let mut sum = 0;
     let valid = possible_with(Bag {
         red: 12,
         green: 13,
         blue: 14,
     });
 
-    for game in input.lines().map(parse_game) {
-        if game.hands.iter().all(&valid) {
-            sum += game.id;
-        }
-    }
-
-    sum
+    input
+        .lines()
+        .map(parse_game)
+        .filter(|game| game.hands.iter().all(&valid))
+        .fold(0, |sum, game| sum + game.id)
 }
 
 // -----------------------------------------------------------------------------
@@ -98,7 +94,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_works() {
+    fn check_sample() {
         assert_eq!(process(include_str!("./sample.txt")), 8)
     }
 }
