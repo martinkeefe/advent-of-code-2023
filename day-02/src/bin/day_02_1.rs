@@ -67,7 +67,7 @@ fn parse_game(line: &str) -> Game {
 // -----------------------------------------------------------------------------
 // Solution
 
-// curried function!
+// curried function! (https://internals.rust-lang.org/t/currying-in-rust/10326)
 fn possible_with(bag: Bag) -> impl Fn(&Hand) -> bool {
     move |hand| hand.red <= bag.red && hand.green <= bag.green && hand.blue <= bag.blue
 }
